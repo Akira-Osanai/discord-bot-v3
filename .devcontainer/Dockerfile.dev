@@ -1,0 +1,27 @@
+# Development Dockerfile
+FROM mcr.microsoft.com/devcontainers/python:3.13
+
+# Install additional development tools
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /workspace
+
+# Copy development requirements
+COPY requirements-dev.txt .
+
+# Install development dependencies
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+# Set environment variables for development
+ENV ENV=development
+ENV PYTHONPATH=/workspace
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keep container running
+CMD ["sleep", "infinity"]

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}API仕様 - BTC/USD API{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="h3 mb-3">
+            <i class="fas fa-book me-2 text-primary"></i>API仕様書
+        </h2>
+        <p class="text-muted">BTC/USD APIの詳細な仕様と使用方法をご説明いたします</p>
+    </div>
+</div>
+
+<!-- API概要 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>API概要</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>基本情報</h6>
+                        <ul class="list-unstyled">
+                            <li><strong>ベースURL:</strong> <code>http://localhost:8000</code></li>
+                            <li><strong>認証:</strong> 不要</li>
+                            <li><strong>データ形式:</strong> JSON</li>
+                            <li><strong>レート制限:</strong> なし</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>対応データ</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>リアルタイム価格</li>
+                            <li><i class="fas fa-check text-success me-2"></i>履歴データ</li>
+                            <li><i class="fas fa-check text-success me-2"></i>基本情報</li>
+                            <li><i class="fas fa-check text-success me-2"></i>ヘルスチェック</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- エンドポイント詳細 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-code me-2"></i>エンドポイント詳細</h5>
+            </div>
+            <div class="card-body">
+
+                <!-- 現在価格エンドポイント -->
+                <div class="endpoint-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success me-3">GET</span>
+                        <h6 class="mb-0">/btc/current</h6>
+                    </div>
+                    <p class="text-muted mb-2">現在のBTC/USD価格を取得いたします</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>レスポンス例:</h6>
+                            <pre class="bg-light p-3 rounded"><code>{
+  "symbol": "BTC-USD",
+  "price": 43250.50,
+  "currency": "USD",
+  "timestamp": "2024-01-15T10:30:00",
+  "volume": 1234567,
+  "market_cap": 850000000000
+}</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>フィールド説明:</h6>
+                            <ul class="list-unstyled small">
+                                <li><code>symbol</code>: 通貨ペア</li>
+                                <li><code>price</code>: 現在価格（USD）</li>
+                                <li><code>currency</code>: 通貨単位</li>
+                                <li><code>timestamp</code>: 取得時刻</li>
+                                <li><code>volume</code>: 24時間取引量</li>
+                                <li><code>market_cap</code>: 時価総額</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 履歴データエンドポイント -->
+                <div class="endpoint-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success me-3">GET</span>
+                        <h6 class="mb-0">/btc/historical</h6>
+                    </div>
+                    <p class="text-muted mb-2">指定した期間と間隔の履歴データを取得いたします</p>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>クエリパラメータ:</h6>
+                            <ul class="list-unstyled small">
+                                <li><code>period</code>: 期間（1d, 5d, 1mo, 3mo, 6mo, 1y, 2y, 5y, 10y, ytd, max）</li>
+                                <li><code>interval</code>: 間隔（1d, 3d, 7d, 1mo）
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>使用例:</h6>
+                            <code class="bg-light p-2 rounded d-block">/btc/historical?period=5d&interval=1d</code>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>レスポンス例:</h6>
+                            <pre class="bg-light p-3 rounded"><code>{
+  "symbol": "BTC-USD",
+  "period": "5d",
+  "interval": "1d",
+  "data_count": 5,
+  "data": [
+    {
+      "timestamp": "2024-01-10T00:00:00",
+      "open": 43000.00,
+      "high": 43500.00,
+      "low": 42800.00,
+      "close": 43250.50,
+      "volume": 1234567
+    }
+  ]
+}</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>フィールド説明:</h6>
+                            <ul class="list-unstyled small">
+                                <li><code>symbol</code>: 通貨ペア</li>
+                                <li><code>period</code>: 指定した期間</li>
+                                <li><code>interval</code>: 指定した間隔</li>
+                                <li><code>data_count</code>: データ件数</li>
+                                <li><code>data</code>: 価格データの配列</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 基本情報エンドポイント -->
+                <div class="endpoint-section mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-success me-3">GET</span>
+                        <h6 class="mb-0">/btc/info</h6>
+                    </div>
+                    <p class="text-muted mb-2">BTCの基本情報を取得いたします</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>レスポンス例:</h6>
+                            <pre class="bg-light p-3 rounded"><code>{
+  "symbol": "BTC-USD",
+  "name": "Bitcoin",
+  "sector": "Cryptocurrency",
+  "industry": "Digital Currency",
+  "market_cap": 850000000000,
+  "volume": 1234567,
+  "fifty_two_week_high": 50000.00,
+  "fifty_two_week_low": 30000.00
+}</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>フィールド説明:</h6>
+                            <ul class="list-unstyled small">
+                                <li><code>name</code>: 通貨名</li>
+                                <li><code>sector</code>: セクター</li>
+                                <li><code>industry</code>: 業界</li>
+                                <li><code>fifty_two_week_high</code>: 52週間最高値</li>
+                                <li><code>fifty_two_week_low</code>: 52週間最低値</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ヘルスチェックエンドポイント -->
+                <div class="endpoint-section">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge bg-info me-3">GET</span>
+                        <h6 class="mb-0">/health</h6>
+                    </div>
+                    <p class="text-muted mb-2">APIの稼働状況を確認いたします</p>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>レスポンス例:</h6>
+                            <pre class="bg-light p-3 rounded"><code>{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00"
+}</code></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>フィールド説明:</h6>
+                            <ul class="list-unstyled small">
+                                <li><code>status</code>: ステータス（healthy/unhealthy）</li>
+                                <li><code>timestamp</code>: チェック時刻</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 使用例 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>使用例</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>JavaScript (fetch)</h6>
+                        <pre class="bg-light p-3 rounded"><code>// 現在価格を取得
+fetch('/btc/current')
+  .then(response => response.json())
+  .then(data => {
+    console.log('BTC価格:', data.price);
+  });
+
+// 履歴データを取得
+fetch('/btc/historical?period=1mo&interval=1d')
+  .then(response => response.json())
+  .then(data => {
+    console.log('データ件数:', data.data_count);
+  });</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Python (requests)</h6>
+                        <pre class="bg-light p-3 rounded"><code>import requests
+
+# 現在価格を取得
+response = requests.get('http://localhost:8000/btc/current')
+data = response.json()
+print(f"BTC価格: ${data['price']}")
+
+# 履歴データを取得
+response = requests.get('http://localhost:8000/btc/historical', 
+                       params={'period': '1mo', 'interval': '1d'})
+data = response.json()
+print(f"データ件数: {data['data_count']}")</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- エラーハンドリング -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>エラーハンドリング</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>HTTPステータスコード</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-success">200</span> 成功</li>
+                            <li><span class="badge bg-warning">400</span> リクエストエラー</li>
+                            <li><span class="badge bg-danger">500</span> サーバーエラー</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>エラーレスポンス例</h6>
+                        <pre class="bg-light p-3 rounded"><code>{
+  "error": "validation_error",
+  "message": "無効な期間です。有効な値: ['1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max']"
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .endpoint-section {
+        border-bottom: 1px solid #e9ecef;
+        padding-bottom: 1.5rem;
+    }
+
+    .endpoint-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    pre {
+        font-size: 0.875rem;
+        line-height: 1.4;
+    }
+
+    code {
+        font-family: 'Courier New', monospace;
+        background-color: #f8f9fa;
+        padding: 0.2rem 0.4rem;
+        border-radius: 0.25rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1130 @@
+{% extends "base.html" %}
+
+{% block title %}BTC/USD ダッシュボード{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="h3 mb-3">
+            <i class="fas fa-chart-line me-2 text-primary"></i>BTC/USD ダッシュボード
+        </h2>
+        <p class="text-muted">リアルタイムでビットコインの価格情報とテクニカルインジケータを表示いたします</p>
+    </div>
+</div>
+
+<!-- 現在価格カード -->
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fab fa-bitcoin fa-2x text-warning me-2"></i>
+                    <h6 class="mb-0">現在価格</h6>
+                </div>
+                <h3 class="text-primary mb-1" id="current-price">--</h3>
+                <small class="text-muted" id="current-timestamp">--</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fas fa-chart-area fa-2x text-success me-2"></i>
+                    <h6 class="mb-0">24時間変動</h6>
+                </div>
+                <h3 class="text-success mb-1" id="price-change">--</h3>
+                <small class="text-muted">USD</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fas fa-volume-up fa-2x text-info me-2"></i>
+                    <h6 class="mb-0">取引量</h6>
+                </div>
+                <h3 class="text-info mb-1" id="volume">--</h3>
+                <small class="text-muted">24時間</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2">
+                    <i class="fas fa-dollar-sign fa-2x text-danger me-2"></i>
+                    <h6 class="mb-0">時価総額</h6>
+                </div>
+                <h3 class="text-danger mb-1" id="market-cap">--</h3>
+                <small class="text-muted">USD</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- インジケータサマリー -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>インジケータサマリー
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- 上昇・下降カウント -->
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center summary-card up-card">
+                            <div class="h4 text-success mb-1 count-value" id="upCount">-</div>
+                            <div class="text-muted">上昇</div>
+                            <div class="small text-success percent-value">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center summary-card down-card">
+                            <div class="h4 text-danger mb-1 count-value" id="downCount">-</div>
+                            <div class="text-muted">下降</div>
+                            <div class="small text-danger percent-value">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center summary-card neutral-card">
+                            <div class="h4 text-warning mb-1 count-value" id="neutralCount">-</div>
+                            <div class="text-muted">中立</div>
+                            <div class="small text-warning percent-value">-</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="h4 text-info mb-1" id="totalCount">-</div>
+                            <div class="text-muted">総数</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 売買スコア -->
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <div class="h3 mb-1" id="buyScore">-</div>
+                                <div>買いスコア</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <div class="h3 mb-1" id="sellScore">-</div>
+                                <div>売りスコア</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 推奨アクション -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info text-center" id="recommendation">
+                            <i class="fas fa-info-circle me-2"></i>
+                            インジケータデータを読み込んでください
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 市場センチメント -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="text-center">
+                            <div id="market-sentiment" class="h5 text-muted">
+                                <i class="fas fa-minus me-2"></i>
+                                <strong>市場センチメント: 中立</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- インジケータ値テーブル -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow bg-dark text-light">
+            <div class="card-header bg-dark text-light border-secondary">
+                <h5 class="mb-0"><i class="fas fa-table me-2"></i>インジケータ値</h5>
+            </div>
+            <div class="card-body bg-dark text-light">
+                <div class="table-responsive">
+                    <table class="table table-hover table-dark" id="indicator-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th class="text-light">インジケータ</th>
+                                <th class="text-light">現在値</th>
+                                <th class="text-light">重要度</th>
+                                <th class="text-light">状態</th>
+                            </tr>
+                        </thead>
+                        <tbody id="indicator-table-body" class="table-dark">
+                            <!-- 動的に生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- インジケータ説明 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>インジケータの説明</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- SMA -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>SMA (単純移動平均線)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">過去20日間の終値の平均値</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇</span>
+                                    <small>現在価格 > SMA</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降</span>
+                                    <small>現在価格 < SMA</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド方向の判断</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EMA -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>EMA (指数移動平均線)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">最近のデータにより重みを置く移動平均</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇</span>
+                                    <small>現在価格 > EMA</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降</span>
+                                    <small>現在価格 < EMA</small>
+                                </div>
+                                <small class="text-muted">用途: 短期トレンドの検出</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RSI -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>RSI (相対力指数)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格の上昇・下降の強さを測定 (0-100)</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>RSI < 30 (売られすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>RSI > 70 (買われすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">中立</span>
+                                    <small>30 ≤ RSI ≤ 70</small>
+                                </div>
+                                <small class="text-muted">用途: 過熱感・過冷感の判断</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MACD -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>MACD (移動平均収束発散)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">短期EMAと長期EMAの差</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇トレンド</span>
+                                    <small>MACD > 0</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降トレンド</span>
+                                    <small>MACD < 0</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">強さ</span>
+                                    <small>絶対値が大きいほど強い</small>
+                                </div>
+                                <small class="text-muted">用途: トレンドの方向と強さ</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bollinger Bands -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>ボリンジャーバンド</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">移動平均線を中心とした価格バンド</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>価格 > 上バンド (買われすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>価格 < 下バンド (売られすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">中立</span>
+                                    <small>バンド内の価格</small>
+                                </div>
+                                <small class="text-muted">用途: ボラティリティと過熱感</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ATR -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-secondary">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>ATR (平均真の範囲)</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格の変動幅（ボラティリティ）</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-warning me-1">高ボラティリティ</span>
+                                    <small>ATR値が大きい</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">低ボラティリティ</span>
+                                    <small>ATR値が小さい</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">ストップロス</span>
+                                    <small>ATRの2-3倍を目安</small>
+                                </div>
+                                <small class="text-muted">用途: ボラティリティ測定・ストップロス設定</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stochastic -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>ストキャスティクス</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格の位置を0-100で表示</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>値 < 20 (売られすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>値 > 80 (買われすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">中立</span>
+                                    <small>20 ≤ 値 ≤ 80</small>
+                                </div>
+                                <small class="text-muted">用途: 過熱感・過冷感の判断</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Williams %R -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-danger">
+                            <div class="card-header bg-danger text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Williams %R</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格の過熱感・過冷感を測定 (-100〜0)</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>値 ≤ -80 (売られすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>値 ≥ -20 (買われすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">中立</span>
+                                    <small>-80 < 値 < -20</small>
+                                </div>
+                                <small class="text-muted">用途: RSIの代替、過熱感の判断</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CCI -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>CCI</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格の周期性とトレンドを測定</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>値 ≤ -100 (売られすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>値 ≥ +100 (買われすぎ)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">中立</span>
+                                    <small>-100 < 値 < +100</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド強度と周期性の測定</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADX -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>ADX</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">トレンドの強さを測定 (0-100)</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">トレンドなし</span>
+                                    <small>0 ≤ 値 ≤ 25</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-warning me-1">弱いトレンド</span>
+                                    <small>25 < 値 ≤ 50</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">強いトレンド</span>
+                                    <small>50 < 値 ≤ 75</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">非常に強いトレンド</span>
+                                    <small>値 > 75</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド強度の測定</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OBV -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>OBV</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格と出来高の関係を分析</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">強い上昇トレンド</span>
+                                    <small>OBV上昇 + 価格上昇</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-warning me-1">弱い上昇トレンド</span>
+                                    <small>OBV下降 + 価格上昇</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">転換の可能性</span>
+                                    <small>OBV上昇 + 価格下降</small>
+                                </div>
+                                <small class="text-muted">用途: ボリューム分析・トレンド確認</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parabolic SAR -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Parabolic SAR</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">トレンド転換とストップロス設定</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇トレンド</span>
+                                    <small>価格 > SAR</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降トレンド</span>
+                                    <small>価格 < SAR</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">トレンド転換</span>
+                                    <small>価格がSARをクロス</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド追従・ストップロス</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ichimoku Cloud -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-cloud me-2"></i>Ichimoku Cloud</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">日本の伝統的テクニカル分析</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇トレンド</span>
+                                    <small>価格 > 雲（先行スパン）</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降トレンド</span>
+                                    <small>価格 < 雲（先行スパン）</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">転換シグナル</span>
+                                    <small>転換線 > 基準線</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド・サポート・レジスタンス</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VWAP -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>VWAP</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">出来高加重平均価格</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>価格 > VWAP</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>価格 < VWAP</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">サポート/レジスタンス</span>
+                                    <small>価格 ≈ VWAP</small>
+                                </div>
+                                <small class="text-muted">用途: 公正価格・トレード判断</small>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Money Flow Index -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Money Flow Index</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">出来高を考慮したRSIの改良版</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>MFI < 20（オーバーセール）</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>MFI > 80（オーバーボート）</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>20 ≤ MFI ≤ 80</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド・逆張りシグナル</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rate of Change -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-secondary">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-percentage me-2"></i>Rate of Change</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格変化率</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇トレンド</span>
+                                    <small>ROC > 0</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降トレンド</span>
+                                    <small>ROC < 0</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">モメンタム</span>
+                                    <small>ROCの絶対値が大きい</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド・モメンタム強度</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Keltner Channel -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-area me-2"></i>Keltner Channel</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">ボラティリティベースのトレンド分析</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">上昇トレンド</span>
+                                    <small>価格 > 上線</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">下降トレンド</span>
+                                    <small>価格 < 下線</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">レンジ相場</span>
+                                    <small>価格が中線付近</small>
+                                </div>
+                                <small class="text-muted">用途: トレンド・ブレイクアウト</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donchian Channel -->
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Donchian Channel</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="small text-muted mb-2">価格レンジの分析</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">ブレイクアウト</span>
+                                    <small>価格が上線/下線を突破</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">トレンド継続</span>
+                                    <small>チャネル内での動き</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-warning me-1">転換点</span>
+                                    <small>中線付近での反転</small>
+                                </div>
+                                <small class="text-muted">用途: ブレイクアウト・レンジ取引</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ETF Flow -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="ETF Flow">
+                        <div class="card h-100 border-primary">
+                            <div class="card-header bg-primary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-area me-2"></i>ETF Flow</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-primary mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">機関投資家動向の分析</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">強力な買い</span>
+                                    <small>フロー増加 + 強度上昇</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">強力な売り</span>
+                                    <small>フロー減少 + 強度低下</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>フロー変化なし</small>
+                                </div>
+                                <small class="text-muted">用途: 機関投資家動向・市場センチメント</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hash Rate -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="Hash Rate">
+                        <div class="card h-100 border-success">
+                            <div class="card-header bg-success text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-server me-2"></i>Hash Rate</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-success mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">ビットコインネットワークのセキュリティ指標</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">強力な買い</span>
+                                    <small>ハッシュレート上昇</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">強力な売り</span>
+                                    <small>ハッシュレート低下</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>ハッシュレート変化なし</small>
+                                </div>
+                                <small class="text-muted">用途: ネットワークセキュリティ・マイナー動向</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Addresses -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="Active Addresses">
+                        <div class="card h-100 border-info">
+                            <div class="card-header bg-info text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-users me-2"></i>Active Addresses</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-info mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">ネットワーク活動の指標</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">強力な買い</span>
+                                    <small>アクティブアドレス増加</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">強力な売り</span>
+                                    <small>アクティブアドレス減少</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>アクティブアドレス変化なし</small>
+                                </div>
+                                <small class="text-muted">用途: ネットワーク活動・ユーザー動向</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fear & Greed Index -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="Fear & Greed Index">
+                        <div class="card h-100 border-warning">
+                            <div class="card-header bg-warning text-dark py-2">
+                                <h6 class="mb-0"><i class="fas fa-brain me-2"></i>Fear & Greed Index</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-warning mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">市場心理の指標 (0-100)</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">買いシグナル</span>
+                                    <small>0-25 (極度の恐怖)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">売りシグナル</span>
+                                    <small>75-100 (極度の貪欲)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>25-75 (バランス)</small>
+                                </div>
+                                <small class="text-muted">用途: 市場心理・逆張り戦略</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Correlation -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="Correlation">
+                        <div class="card h-100 border-secondary">
+                            <div class="card-header bg-secondary text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-link me-2"></i>Correlation</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-secondary mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">伝統市場との相関関係 (-1 ～ +1)</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">分散効果</span>
+                                    <small>相関 -0.3以下</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">連動効果</span>
+                                    <small>相関 +0.7以上</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中立</span>
+                                    <small>相関 -0.3 ～ +0.7</small>
+                                </div>
+                                <small class="text-muted">用途: ポートフォリオ分散・リスク管理</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Realized Volatility -->
+                    <div class="col-md-6 col-lg-4 mb-3" data-indicator="Realized Volatility">
+                        <div class="card h-100 border-danger">
+                            <div class="card-header bg-danger text-white py-2">
+                                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Realized Volatility</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- 実際の値表示 -->
+                                <div class="text-center mb-3">
+                                    <div class="h4 text-danger mb-1">
+                                        <span class="indicator-value">--</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span class="indicator-status badge bg-secondary">--</span>
+                                        <span class="indicator-signal badge bg-secondary ms-2">--</span>
+                                    </div>
+                                </div>
+
+                                <p class="small text-muted mb-2">過去の価格変動率</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-success me-1">低ボラティリティ</span>
+                                    <small>30%以下 (安定)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-danger me-1">高ボラティリティ</span>
+                                    <small>70%以上 (不安定)</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-info me-1">中ボラティリティ</span>
+                                    <small>30-70% (標準)</small>
+                                </div>
+                                <small class="text-muted">用途: リスク評価・ポジションサイズ調整</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- トレード判断の参考 -->
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-2"></i>トレード判断の参考</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success">買いシグナル</h6>
+                            <ul class="small text-muted">
+                                <li>RSI < 30 または ストキャスティクス < 20</li>
+                                <li>価格がボリンジャーバンド下線を下回る</li>
+                                <li>価格がSMA・EMAを上回る</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-danger">売りシグナル</h6>
+                            <ul class="small text-muted">
+                                <li>RSI > 70 または ストキャスティクス > 80</li>
+                                <li>価格がボリンジャーバンド上線を上回る</li>
+                                <li>価格がSMA・EMAを下回る</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            注意: これらのインジケータは参考情報です。実際のトレードでは複数の要因を総合的に判断してください。
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 一年分データ取得 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-download me-2"></i>一年分データ取得</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">BTC-USDの一年分の各種足データを取得して保存いたします</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <button id="fetch-yearly-data" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-download me-2"></i>一年分データ取得開始
+                        </button>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center h-100">
+                            <div class="text-muted">
+                                <small>取得されるデータ:</small><br>
+                                <div class="mb-1">
+                                    <span class="badge bg-primary me-1">1分足 (7日)</span>
+                                    <span class="badge bg-primary me-1">5分足 (60日)</span>
+                                    <span class="badge bg-primary me-1">15分足 (60日)</span>
+                                    <span class="badge bg-primary me-1">30分足 (60日)</span>
+                                </div>
+                                <div class="mb-1">
+                                    <span class="badge bg-success me-1">1時間足 (1年)</span>
+                                    <span class="badge bg-success me-1">2時間足 (1年)</span>
+                                    <span class="badge bg-success me-1">4時間足 (1年)</span>
+                                    <span class="badge bg-success me-1">8時間足 (1年)</span>
+                                    <span class="badge bg-success me-1">12時間足 (1年)</span>
+                                </div>
+                                <div>
+                                    <span class="badge bg-info me-1">日足 (1年)</span>
+                                    <span class="badge bg-info me-1">3日足 (1年)</span>
+                                    <span class="badge bg-info me-1">週足 (1年)</span>
+                                    <span class="badge bg-info me-1">月足 (1年)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="fetch-progress" class="mt-3" style="display: none;">
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                            style="width: 0%"></div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">データ取得中...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 基本情報 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>基本情報</h5>
+            </div>
+            <div class="card-body">
+                <div class="row" id="btc-info">
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="d-flex align-items-center p-2 bg-light rounded">
+                            <i class="fas fa-tag text-primary me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">シンボル</small>
+                                <strong id="symbol">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="d-flex align-items-center p-2 bg-light rounded">
+                            <i class="fas fa-industry text-success me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">業界</small>
+                                <strong id="industry">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="d-flex align-items-center p-2 bg-light rounded">
+                            <i class="fas fa-chart-bar text-info me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">52週間最高</small>
+                                <strong id="fifty-two-week-high">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="d-flex align-items-center p-2 bg-light rounded">
+                            <i class="fas fa-chart-line text-warning me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">52週間最低</small>
+                                <strong id="fifty-two-week-low">--</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- ローディングスピナー -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">読み込み中...</span>
+                </div>
+                <p class="mb-0">データを取得中です...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- フォールバック用のローディングオーバーレイ -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">読み込み中...</span>
+        </div>
+        <p class="mb-0 text-white">データを取得中です...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-content {
+        text-align: center;
+        color: white;
+    }
+
+    /* ダークモードテーブルのスタイル */
+    .table-dark {
+        background-color: #212529;
+        color: #f8f9fa;
+    }
+
+    .table-dark thead th {
+        background-color: #343a40;
+        border-color: #495057;
+        color: #f8f9fa;
+    }
+
+    .table-dark tbody tr {
+        background-color: #212529;
+        border-color: #495057;
+    }
+
+    .table-dark tbody tr:hover {
+        background-color: #343a40;
+        color: #f8f9fa;
+    }
+
+    .table-dark td {
+        border-color: #495057;
+        color: #f8f9fa;
+    }
+
+    /* ダークモードカードのスタイル */
+    .card.bg-dark {
+        background-color: #212529 !important;
+        border-color: #495057;
+    }
+
+    .card.bg-dark .card-header {
+        background-color: #343a40 !important;
+        border-color: #495057;
+    }
+
+    .card.bg-dark .card-body {
+        background-color: #212529 !important;
+    }
+
+    /* ステータス色の調整 */
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 分割されたJavaScriptファイルを読み込み -->
+<script src="{{ url_for('static', path='/js/main.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard/data-fetcher.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard/price-display.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard/indicator-table.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard/indicator-summary-calculator.js') }}"></script>
+<script src="{{ url_for('static', path='/js/dashboard/indicator-cards.js') }}"></script>
+
+<script src="{{ url_for('static', path='/js/dashboard-core.js') }}"></script>
+
+<!-- メインのダッシュボード初期化 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('ダッシュボード初期化開始');
+
+        // DashboardCoreの初期化は既にdashboard-core.jsで行われている
+        // 追加の初期化処理が必要な場合はここに記述
+
+        console.log('ダッシュボード初期化完了');
+    });
+</script>
+{% endblock %}

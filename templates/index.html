@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}BTC/USD API - ホーム{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+        <div class="hero-section mb-5">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                <i class="fab fa-bitcoin me-3"></i>BTC/USD API
+            </h1>
+            <p class="lead text-muted mb-4">
+                リアルタイムでビットコインの価格情報を取得し、美しいダッシュボードで表示いたします✨
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/dashboard" class="btn btn-primary btn-lg">
+                    <i class="fas fa-chart-line me-2"></i>BTCダッシュボード
+                </a>
+
+                <a href="/api-docs" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-book me-2"></i>API仕様
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-line fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">日足データ</h5>
+                <p class="card-text text-muted">
+                    Yahoo!ファイナンスから日足ベースのビットコイン価格データを取得し、履歴データを提供いたします
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-bar fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">テクニカルインジケータ</h5>
+                <p class="card-text text-muted">
+                    SMA、EMA、RSI、MACD、ボリンジャーバンド等の豊富なテクニカル分析を提供いたします
+                </p>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card border-0 shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>API エンドポイント</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <span class="badge bg-success">GET</span>
+                            </div>
+                            <div>
+                                <strong>/btc/current</strong>
+                                <small class="d-block text-muted">現在の価格を取得</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <span class="badge bg-success">GET</span>
+                            </div>
+                            <div>
+                                <strong>/btc/historical</strong>
+                                <small class="d-block text-muted">日足履歴データを取得</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <span class="badge bg-success">GET</span>
+                            </div>
+                            <div>
+                                <strong>/btc/info</strong>
+                                <small class="d-block text-muted">基本情報を取得</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <span class="badge bg-info">GET</span>
+                            </div>
+                            <div>
+                                <strong>/health</strong>
+                                <small class="d-block text-muted">ヘルスチェック</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                            <div class="me-3">
+                                <span class="badge bg-warning">GET</span>
+                            </div>
+                            <div>
+                                <strong>/{symbol}/indicators</strong>
+                                <small class="d-block text-muted">テクニカルインジケータ</small>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

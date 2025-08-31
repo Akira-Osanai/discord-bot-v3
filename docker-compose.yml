@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # Development environment
+  app-dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile.dev
+    volumes:
+      - .:/workspace:cached
+      - /workspace/node_modules
+    working_dir: /workspace
+    environment:
+      - ENV=development
+      - PYTHONPATH=/workspace
+    ports:
+      - "8000:8000"
+    command: sleep infinity
+
+  # Production environment
+  app-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ENV=production
+      - PYTHONPATH=/app
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
+
+  # Production with nginx (optional)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app-prod
+    restart: unless-stopped
